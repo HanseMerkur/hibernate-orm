@@ -110,7 +110,7 @@ public final class OneEntityQueryGenerator extends AbstractRelationQueryGenerato
 				originalIdPropertyName, MIDDLE_ENTITY_ALIAS, inclusive, componentData
 		);
 		// ee.revision_type != DEL
-		rootParameters.addWhereWithNamedParam( getRevisionTypePath(), "!=", DEL_REVISION_TYPE_PARAMETER );
+		//FIXME tob rootParameters.addWhereWithNamedParam( getRevisionTypePath(), "!=", DEL_REVISION_TYPE_PARAMETER );
 	}
 
 	/**
@@ -124,9 +124,10 @@ public final class OneEntityQueryGenerator extends AbstractRelationQueryGenerato
 		// Excluding current revision, because we need to match data valid at the previous one.
 		createValidDataRestrictions( auditStrategy, versionsMiddleEntityName, remQb, valid, false, componentData );
 		// ee.revision = :revision
-		removed.addWhereWithNamedParam( verEntCfg.getRevisionNumberPath(), "=", REVISION_PARAMETER );
+		//FIXME tob removed.addWhereWithNamedParam( verEntCfg.getRevisionNumberPath(), "=", REVISION_PARAMETER );
+		//FIXME tob removed.addWhereWithNamedParam( verEntCfg.getRevisionNumberPath(), "=", verEntCfg.getRevisionFieldName() );
 		// ee.revision_type = DEL
-		removed.addWhereWithNamedParam( getRevisionTypePath(), "=", DEL_REVISION_TYPE_PARAMETER );
+		//FIXME tob		removed.addWhereWithNamedParam( getRevisionTypePath(), "=", DEL_REVISION_TYPE_PARAMETER );
 	}
 
 	@Override

@@ -68,8 +68,8 @@ public abstract class AbstractRelationQueryGenerator implements RelationQueryGen
 
 	public Query getQuery(AuditReaderImplementor versionsReader, Object primaryKey, Number revision, boolean removed) {
 		Query query = versionsReader.getSession().createQuery( removed ? getQueryRemovedString() : getQueryString() );
-		query.setParameter( DEL_REVISION_TYPE_PARAMETER, RevisionType.DEL );
-		query.setParameter( REVISION_PARAMETER, revision );
+	    //FIXME tob	query.setParameter( DEL_REVISION_TYPE_PARAMETER, RevisionType.DEL );
+		// FIXME tob    query.setParameter( REVISION_PARAMETER, revision );
 		for ( QueryParameterData paramData : referencingIdData.getPrefixedMapper().mapToQueryParametersFromId( primaryKey ) ) {
 			paramData.setParameterValue( query );
 		}

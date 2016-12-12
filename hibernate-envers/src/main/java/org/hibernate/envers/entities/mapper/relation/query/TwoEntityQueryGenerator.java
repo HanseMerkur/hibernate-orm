@@ -146,9 +146,9 @@ public final class TwoEntityQueryGenerator extends AbstractRelationQueryGenerato
 				inclusive, componentData
 		);
 		// ee.revision_type != DEL
-		rootParameters.addWhereWithNamedParam( revisionTypePropName, "!=", DEL_REVISION_TYPE_PARAMETER );
+		//FIXME tob rootParameters.addWhereWithNamedParam( revisionTypePropName, "!=", DEL_REVISION_TYPE_PARAMETER );
 		// e.revision_type != DEL
-		rootParameters.addWhereWithNamedParam( REFERENCED_ENTITY_ALIAS + "." + revisionTypePropName, false, "!=", DEL_REVISION_TYPE_PARAMETER );
+		//FIXME tob rootParameters.addWhereWithNamedParam( REFERENCED_ENTITY_ALIAS + "." + revisionTypePropName, false, "!=", DEL_REVISION_TYPE_PARAMETER );
 	}
 
 	/**
@@ -169,9 +169,9 @@ public final class TwoEntityQueryGenerator extends AbstractRelationQueryGenerato
 		// e.revision = :revision
 		removed.addWhereWithNamedParam( REFERENCED_ENTITY_ALIAS + "." + revisionPropertyPath, false, "=", REVISION_PARAMETER );
 		// ee.revision_type = DEL
-		removed.addWhereWithNamedParam( revisionTypePropName, "=", DEL_REVISION_TYPE_PARAMETER );
+		//FIXME tob removed.addWhereWithNamedParam( revisionTypePropName, "=", DEL_REVISION_TYPE_PARAMETER );
 		// e.revision_type = DEL
-		removed.addWhereWithNamedParam( REFERENCED_ENTITY_ALIAS + "." + revisionTypePropName, false, "=", DEL_REVISION_TYPE_PARAMETER );
+		//FIXME tob removed.addWhereWithNamedParam( REFERENCED_ENTITY_ALIAS + "." + revisionTypePropName, false, "=", DEL_REVISION_TYPE_PARAMETER );
 	}
 
 	@Override

@@ -180,11 +180,11 @@ public final class ThreeEntityQueryGenerator extends AbstractRelationQueryGenera
 				originalIdPropertyName, MIDDLE_ENTITY_ALIAS, inclusive, componentData
 		);
 		// ee.revision_type != DEL
-		rootParameters.addWhereWithNamedParam( revisionTypePropName, "!=", DEL_REVISION_TYPE_PARAMETER );
+		//FIXME tob rootParameters.addWhereWithNamedParam( revisionTypePropName, "!=", DEL_REVISION_TYPE_PARAMETER );
 		// e.revision_type != DEL
-		rootParameters.addWhereWithNamedParam( REFERENCED_ENTITY_ALIAS + "." + revisionTypePropName, false, "!=", DEL_REVISION_TYPE_PARAMETER );
+		//FIXME tob rootParameters.addWhereWithNamedParam( REFERENCED_ENTITY_ALIAS + "." + revisionTypePropName, false, "!=", DEL_REVISION_TYPE_PARAMETER );
 		// f.revision_type != DEL
-		rootParameters.addWhereWithNamedParam( INDEX_ENTITY_ALIAS + "." + revisionTypePropName, false, "!=", DEL_REVISION_TYPE_PARAMETER );
+		//FIXME tob  rootParameters.addWhereWithNamedParam( INDEX_ENTITY_ALIAS + "." + revisionTypePropName, false, "!=", DEL_REVISION_TYPE_PARAMETER );
 	}
 
 	/**
@@ -209,11 +209,11 @@ public final class ThreeEntityQueryGenerator extends AbstractRelationQueryGenera
 		// f.revision = :revision
 		removed.addWhereWithNamedParam( INDEX_ENTITY_ALIAS + "." + revisionPropertyPath, false, "=", REVISION_PARAMETER );
 		// ee.revision_type = DEL
-		removed.addWhereWithNamedParam( revisionTypePropName, "=", DEL_REVISION_TYPE_PARAMETER );
+		//FIXME tob removed.addWhereWithNamedParam( revisionTypePropName, "=", DEL_REVISION_TYPE_PARAMETER );
 		// e.revision_type = DEL
-		removed.addWhereWithNamedParam( REFERENCED_ENTITY_ALIAS + "." + revisionTypePropName, false, "=", DEL_REVISION_TYPE_PARAMETER );
+		//FIXME tob removed.addWhereWithNamedParam( REFERENCED_ENTITY_ALIAS + "." + revisionTypePropName, false, "=", DEL_REVISION_TYPE_PARAMETER );
 		// f.revision_type = DEL
-		removed.addWhereWithNamedParam( INDEX_ENTITY_ALIAS + "." + revisionTypePropName, false, "=", DEL_REVISION_TYPE_PARAMETER );
+		//FIXME tob removed.addWhereWithNamedParam( INDEX_ENTITY_ALIAS + "." + revisionTypePropName, false, "=", DEL_REVISION_TYPE_PARAMETER );
 	}
 
 	@Override

@@ -122,7 +122,7 @@ public final class TwoEntityOneAuditedQueryGenerator extends AbstractRelationQue
 				originalIdPropertyName, MIDDLE_ENTITY_ALIAS, true, componentData
 		);
 		// ee.revision_type != DEL
-		rootParameters.addWhereWithNamedParam( getRevisionTypePath(), "!=", DEL_REVISION_TYPE_PARAMETER );
+		//FIXME tob rootParameters.addWhereWithNamedParam( getRevisionTypePath(), "!=", DEL_REVISION_TYPE_PARAMETER );
 	}
 
 	/**
@@ -136,6 +136,7 @@ public final class TwoEntityOneAuditedQueryGenerator extends AbstractRelationQue
 		createValidDataRestrictions( auditStrategy, versionsMiddleEntityName, remQb, valid, componentData );
 		// ee.revision = :revision
 		removed.addWhereWithNamedParam( verEntCfg.getRevisionNumberPath(), "=", REVISION_PARAMETER );
+
 		// ee.revision_type = DEL
 		removed.addWhereWithNamedParam( getRevisionTypePath(), "=", DEL_REVISION_TYPE_PARAMETER );
 	}
