@@ -74,6 +74,8 @@ public class GlobalConfiguration {
     // Use revision entity with native id generator
     private final boolean useRevisionEntityWithNativeId;
 
+
+
     /*
      Which operator to use in correlated subqueries (when we want a property to be equal to the result of
      a correlated subquery, for example: e.p <operator> (select max(e2.p) where e2.p2 = e.p2 ...).
@@ -83,6 +85,8 @@ public class GlobalConfiguration {
     private final String correlatedSubqueryOperator;
 
     public GlobalConfiguration(Properties properties) {
+
+
         String generateRevisionsForCollectionsStr = getProperty(properties,
                 "org.hibernate.envers.revision_on_collection_change",
                 "org.hibernate.envers.revisionOnCollectionChange",
@@ -195,4 +199,6 @@ public class GlobalConfiguration {
     public boolean isUseRevisionEntityWithNativeId() {
         return useRevisionEntityWithNativeId;
     }
+
+
 }

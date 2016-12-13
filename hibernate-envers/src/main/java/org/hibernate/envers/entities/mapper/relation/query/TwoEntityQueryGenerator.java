@@ -145,10 +145,12 @@ public final class TwoEntityQueryGenerator extends AbstractRelationQueryGenerato
 				eeOriginalIdPropertyPath, revisionPropertyPath, originalIdPropertyName, MIDDLE_ENTITY_ALIAS,
 				inclusive, componentData
 		);
-		// ee.revision_type != DEL
-		//FIXME tob rootParameters.addWhereWithNamedParam( revisionTypePropName, "!=", DEL_REVISION_TYPE_PARAMETER );
-		// e.revision_type != DEL
-		//FIXME tob rootParameters.addWhereWithNamedParam( REFERENCED_ENTITY_ALIAS + "." + revisionTypePropName, false, "!=", DEL_REVISION_TYPE_PARAMETER );
+		if (verEntCfg.isRevisionTypeInAuditTable()) {
+			// ee.revision_type != DEL
+			rootParameters.addWhereWithNamedParam(revisionTypePropName, "!=", DEL_REVISION_TYPE_PARAMETER);
+			// e.revision_type != DEL
+			rootParameters.addWhereWithNamedParam(REFERENCED_ENTITY_ALIAS + "." + revisionTypePropName, false, "!=", DEL_REVISION_TYPE_PARAMETER);
+		}
 	}
 
 	/**
@@ -164,14 +166,18 @@ public final class TwoEntityQueryGenerator extends AbstractRelationQueryGenerato
 		final String revisionTypePropName = getRevisionTypePath();
 		// Excluding current revision, because we need to match data valid at the previous one.
 		createValidDataRestrictions( globalCfg, auditStrategy, referencedIdData, versionsMiddleEntityName, remQb, valid, false, componentData );
-		// ee.revision = :revision
-		removed.addWhereWithNamedParam( revisionPropertyPath, "=", REVISION_PARAMETER );
-		// e.revision = :revision
-		removed.addWhereWithNamedParam( REFERENCED_ENTITY_ALIAS + "." + revisionPropertyPath, false, "=", REVISION_PARAMETER );
-		// ee.revision_type = DEL
-		//FIXME tob removed.addWhereWithNamedParam( revisionTypePropName, "=", DEL_REVISION_TYPE_PARAMETER );
-		// e.revision_type = DEL
-		//FIXME tob removed.addWhereWithNamedParam( REFERENCED_ENTITY_ALIAS + "." + revisionTypePropName, false, "=", DEL_REVISION_TYPE_PARAMETER );
+		if (verEntCfg.isUseGlobalRevisionId()) {
+			// ee.revision = :revision
+			removed.addWhereWithNamedParam(revisionPropertyPath, "=", REVISION_PARAMETER);
+			// e.revision = :revision
+			removed.addWhereWithNamedParam(REFERENCED_ENTITY_ALIAS + "." + revisionPropertyPath, false, "=", REVISION_PARAMETER);
+		}
+		if (verEntCfg.isRevisionTypeInAuditTable()) {
+			// ee.revision_type = DEL
+			removed.addWhereWithNamedParam(revisionTypePropName, "=", DEL_REVISION_TYPE_PARAMETER);
+			// e.revision_type = DEL
+			removed.addWhereWithNamedParam(REFERENCED_ENTITY_ALIAS + "." + revisionTypePropName, false, "=", DEL_REVISION_TYPE_PARAMETER);
+		}
 	}
 
 	@Override

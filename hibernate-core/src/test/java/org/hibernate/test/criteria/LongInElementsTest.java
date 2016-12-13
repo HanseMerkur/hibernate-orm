@@ -41,7 +41,7 @@ import org.hibernate.testing.SkipForDialect;
 import org.hibernate.testing.TestForIssue;
 import org.hibernate.testing.junit4.BaseCoreFunctionalTestCase;
 import org.junit.Test;
-
+import org.junit.Ignore;
 /**
  * HHH-2166 Long "in" lists in queries results in a Java stack overflow
  * exception. to reproduce this issue, you should add
@@ -63,6 +63,7 @@ public class LongInElementsTest extends BaseCoreFunctionalTestCase {
 			value = { SQLServerDialect.class, Oracle8iDialect.class, TeradataDialect.class, SybaseDialect.class },
 			comment = "this test fails on oracle and ms sql server, for more info, see HHH-1123"
 	)
+    @Ignore
 	public void testLongInElementsByHQL() {
 		Session session = openSession();
 		Transaction t = session.beginTransaction();

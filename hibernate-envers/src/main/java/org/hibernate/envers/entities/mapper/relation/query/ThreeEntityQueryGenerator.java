@@ -179,12 +179,14 @@ public final class ThreeEntityQueryGenerator extends AbstractRelationQueryGenera
 				referencingIdData, versionsMiddleEntityName, eeOriginalIdPropertyPath, revisionPropertyPath,
 				originalIdPropertyName, MIDDLE_ENTITY_ALIAS, inclusive, componentData
 		);
-		// ee.revision_type != DEL
-		//FIXME tob rootParameters.addWhereWithNamedParam( revisionTypePropName, "!=", DEL_REVISION_TYPE_PARAMETER );
-		// e.revision_type != DEL
-		//FIXME tob rootParameters.addWhereWithNamedParam( REFERENCED_ENTITY_ALIAS + "." + revisionTypePropName, false, "!=", DEL_REVISION_TYPE_PARAMETER );
-		// f.revision_type != DEL
-		//FIXME tob  rootParameters.addWhereWithNamedParam( INDEX_ENTITY_ALIAS + "." + revisionTypePropName, false, "!=", DEL_REVISION_TYPE_PARAMETER );
+		if (verEntCfg.isRevisionTypeInAuditTable()) {
+			// ee.revision_type != DEL
+			rootParameters.addWhereWithNamedParam(revisionTypePropName, "!=", DEL_REVISION_TYPE_PARAMETER);
+			// e.revision_type != DEL
+			rootParameters.addWhereWithNamedParam(REFERENCED_ENTITY_ALIAS + "." + revisionTypePropName, false, "!=", DEL_REVISION_TYPE_PARAMETER);
+			// f.revision_type != DEL
+			rootParameters.addWhereWithNamedParam(INDEX_ENTITY_ALIAS + "." + revisionTypePropName, false, "!=", DEL_REVISION_TYPE_PARAMETER);
+		}
 	}
 
 	/**
@@ -202,18 +204,22 @@ public final class ThreeEntityQueryGenerator extends AbstractRelationQueryGenera
 		createValidDataRestrictions(
 				globalCfg, auditStrategy, referencedIdData, versionsMiddleEntityName, remQb, valid, false, componentData
 		);
-		// ee.revision = :revision
-		removed.addWhereWithNamedParam( revisionPropertyPath, "=", REVISION_PARAMETER );
-		// e.revision = :revision
-		removed.addWhereWithNamedParam( REFERENCED_ENTITY_ALIAS + "." + revisionPropertyPath, false, "=", REVISION_PARAMETER );
-		// f.revision = :revision
-		removed.addWhereWithNamedParam( INDEX_ENTITY_ALIAS + "." + revisionPropertyPath, false, "=", REVISION_PARAMETER );
-		// ee.revision_type = DEL
-		//FIXME tob removed.addWhereWithNamedParam( revisionTypePropName, "=", DEL_REVISION_TYPE_PARAMETER );
-		// e.revision_type = DEL
-		//FIXME tob removed.addWhereWithNamedParam( REFERENCED_ENTITY_ALIAS + "." + revisionTypePropName, false, "=", DEL_REVISION_TYPE_PARAMETER );
-		// f.revision_type = DEL
-		//FIXME tob removed.addWhereWithNamedParam( INDEX_ENTITY_ALIAS + "." + revisionTypePropName, false, "=", DEL_REVISION_TYPE_PARAMETER );
+		if (verEntCfg.isUseGlobalRevisionId()) {
+			// ee.revision = :revision
+			removed.addWhereWithNamedParam(revisionPropertyPath, "=", REVISION_PARAMETER);
+			// e.revision = :revision
+			removed.addWhereWithNamedParam(REFERENCED_ENTITY_ALIAS + "." + revisionPropertyPath, false, "=", REVISION_PARAMETER);
+			// f.revision = :revision
+			removed.addWhereWithNamedParam(INDEX_ENTITY_ALIAS + "." + revisionPropertyPath, false, "=", REVISION_PARAMETER);
+		}
+		if (verEntCfg.isRevisionTypeInAuditTable()) {
+			// ee.revision_type = DEL
+			removed.addWhereWithNamedParam(revisionTypePropName, "=", DEL_REVISION_TYPE_PARAMETER);
+			// e.revision_type = DEL
+			removed.addWhereWithNamedParam(REFERENCED_ENTITY_ALIAS + "." + revisionTypePropName, false, "=", DEL_REVISION_TYPE_PARAMETER);
+			// f.revision_type = DEL
+			removed.addWhereWithNamedParam(INDEX_ENTITY_ALIAS + "." + revisionTypePropName, false, "=", DEL_REVISION_TYPE_PARAMETER);
+		}
 	}
 
 	@Override

@@ -121,8 +121,10 @@ public final class TwoEntityOneAuditedQueryGenerator extends AbstractRelationQue
 				referencingIdData, versionsMiddleEntityName, eeOriginalIdPropertyPath, revisionPropertyPath,
 				originalIdPropertyName, MIDDLE_ENTITY_ALIAS, true, componentData
 		);
-		// ee.revision_type != DEL
-		//FIXME tob rootParameters.addWhereWithNamedParam( getRevisionTypePath(), "!=", DEL_REVISION_TYPE_PARAMETER );
+		if (verEntCfg.isRevisionTypeInAuditTable()) {
+			// ee.revision_type != DEL
+			rootParameters.addWhereWithNamedParam(getRevisionTypePath(), "!=", DEL_REVISION_TYPE_PARAMETER);
+		}
 	}
 
 	/**
@@ -134,8 +136,10 @@ public final class TwoEntityOneAuditedQueryGenerator extends AbstractRelationQue
 		final Parameters valid = disjoint.addSubParameters( "and" ); // Restrictions to match all valid rows.
 		final Parameters removed = disjoint.addSubParameters( "and" ); // Restrictions to match all rows deleted at exactly given revision.
 		createValidDataRestrictions( auditStrategy, versionsMiddleEntityName, remQb, valid, componentData );
-		// ee.revision = :revision
-		removed.addWhereWithNamedParam( verEntCfg.getRevisionNumberPath(), "=", REVISION_PARAMETER );
+		if (verEntCfg.isUseGlobalRevisionId()) {
+			// ee.revision = :revision
+			removed.addWhereWithNamedParam(verEntCfg.getRevisionNumberPath(), "=", REVISION_PARAMETER);
+		}
 
 		// ee.revision_type = DEL
 		removed.addWhereWithNamedParam( getRevisionTypePath(), "=", DEL_REVISION_TYPE_PARAMETER );
