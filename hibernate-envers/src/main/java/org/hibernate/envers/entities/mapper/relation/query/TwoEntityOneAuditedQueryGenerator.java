@@ -140,9 +140,10 @@ public final class TwoEntityOneAuditedQueryGenerator extends AbstractRelationQue
 			// ee.revision = :revision
 			removed.addWhereWithNamedParam(verEntCfg.getRevisionNumberPath(), "=", REVISION_PARAMETER);
 		}
-
-		// ee.revision_type = DEL
-		removed.addWhereWithNamedParam( getRevisionTypePath(), "=", DEL_REVISION_TYPE_PARAMETER );
+		if (verEntCfg.isRevisionTypeInAuditTable()) {
+			// ee.revision_type = DEL
+			removed.addWhereWithNamedParam(getRevisionTypePath(), "=", DEL_REVISION_TYPE_PARAMETER);
+		}
 	}
 
 	@Override
