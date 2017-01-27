@@ -79,7 +79,7 @@ public class RevisionsOfEntityQuery extends AbstractAuditQuery {
           (all specified conditions, transformed, on the "e" entity)
           ORDER BY e.revision ASC (unless another order or projection is specified)
          */
-		if ( !selectDeletedEntities ) {
+		if ( !selectDeletedEntities  && verEntCfg.isRevisionTypeInAuditTable()) {
 			// e.revision_type != DEL AND
 			qb.getRootParameters().addWhereWithParam( verEntCfg.getRevisionTypePropName(), "<>", RevisionType.DEL );
 		}

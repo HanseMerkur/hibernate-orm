@@ -46,6 +46,11 @@ public class  AuditEntitiesConfiguration {
 
 	private final String embeddableSetOrdinalPropertyName;
 
+	// Is the revison type part of the audit table
+	private final boolean revisionTypeInAuditTable;
+        // Is the AuditStrategy using a global revision id or one local to the entity
+	private final boolean useGlobalRevisionId;
+	
 	public AuditEntitiesConfiguration(
 			Properties properties,
 			String revisionInfoEntityName) {
@@ -92,6 +97,15 @@ public class  AuditEntitiesConfiguration {
 		embeddableSetOrdinalPropertyName = ConfigurationHelper.getString(
 				EnversSettings.EMBEDDABLE_SET_ORDINAL_FIELD_NAME, properties, "SETORDINAL"
 		);
+	String revisionTypeInAuditTableStr = ConfigurationHelper.getString(                
+		"org.hibernate.envers.revision_type_in_audit_table",properties,
+		"true");
+	revisionTypeInAuditTable = Boolean.parseBoolean(revisionTypeInAuditTableStr);
+
+	String useGlobalRevisionIdStr = ConfigurationHelper.getString(                
+		"org.hibernate.envers.use_global_revision_id",properties,
+		"true");
+	useGlobalRevisionId = Boolean.parseBoolean(useGlobalRevisionIdStr);
 	}
 
 	public String getOriginalIdPropName() {
@@ -162,5 +176,13 @@ public class  AuditEntitiesConfiguration {
 
 	public String getEmbeddableSetOrdinalPropertyName() {
 		return embeddableSetOrdinalPropertyName;
+	}
+
+	public boolean isRevisionTypeInAuditTable() {
+		return revisionTypeInAuditTable;
+	}
+
+	public boolean isUseGlobalRevisionId() {
+		return useGlobalRevisionId;
 	}
 }
