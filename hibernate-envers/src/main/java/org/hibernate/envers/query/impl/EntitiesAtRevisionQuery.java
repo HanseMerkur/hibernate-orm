@@ -95,7 +95,7 @@ public class EntitiesAtRevisionQuery extends AbstractAuditQuery {
 				revisionPropertyPath, verEntCfg.getRevisionEndFieldName(), true, referencedIdData,
 				revisionPropertyPath, originalIdPropertyName, REFERENCED_ENTITY_ALIAS, REFERENCED_ENTITY_ALIAS_DEF_AUD_STR, true);
 
-        if (!includeDeletions) {
+        if (!includeDeletions && verEntCfg.isRevisionTypeInAuditTable()) {
             // e.revision_type != DEL
             qb.getRootParameters().addWhereWithParam(verEntCfg.getRevisionTypePropName(), "<>", RevisionType.DEL);
         }
