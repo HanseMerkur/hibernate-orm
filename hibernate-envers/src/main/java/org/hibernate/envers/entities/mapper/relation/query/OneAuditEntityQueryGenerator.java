@@ -26,6 +26,7 @@ package org.hibernate.envers.entities.mapper.relation.query;
 import org.hibernate.envers.configuration.AuditEntitiesConfiguration;
 import org.hibernate.envers.configuration.GlobalConfiguration;
 import org.hibernate.envers.entities.mapper.relation.MiddleIdData;
+import org.hibernate.envers.query.impl.SpecialRevisionRestrictionProvider;
 import org.hibernate.envers.tools.query.Parameters;
 import org.hibernate.envers.tools.query.QueryBuilder;
 import org.hibernate.envers.strategy.AuditStrategy;
@@ -48,7 +49,7 @@ public final class OneAuditEntityQueryGenerator extends AbstractRelationQueryGen
 	public OneAuditEntityQueryGenerator(GlobalConfiguration globalCfg, AuditEntitiesConfiguration verEntCfg,
 										AuditStrategy auditStrategy, MiddleIdData referencingIdData,
 										String referencedEntityName, MiddleIdData referencedIdData, boolean revisionTypeInId) {
-		super( verEntCfg, referencingIdData, revisionTypeInId );
+		super( auditStrategy,verEntCfg, referencingIdData, revisionTypeInId );
 
 		/*
 		 * The valid query that we need to create:
@@ -130,6 +131,9 @@ public final class OneAuditEntityQueryGenerator extends AbstractRelationQueryGen
 		if (verEntCfg.isRevisionTypeInAuditTable()) {
 			// e.revision_type = DEL
 			removed.addWhereWithNamedParam( getRevisionTypePath(), false, "=", DEL_REVISION_TYPE_PARAMETER );
+		}
+		if (auditStrategy instanceof SpecialRevisionRestrictionProvider){
+			((SpecialRevisionRestrictionProvider)auditStrategy).setRevisionRestrictionParameter(null,valid);
 		}
 	}
 

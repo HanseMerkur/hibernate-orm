@@ -27,6 +27,7 @@ import org.hibernate.envers.configuration.AuditEntitiesConfiguration;
 import org.hibernate.envers.configuration.GlobalConfiguration;
 import org.hibernate.envers.entities.mapper.relation.MiddleComponentData;
 import org.hibernate.envers.entities.mapper.relation.MiddleIdData;
+import org.hibernate.envers.query.impl.SpecialRevisionRestrictionProvider;
 import org.hibernate.envers.tools.query.Parameters;
 import org.hibernate.envers.tools.query.QueryBuilder;
 import org.hibernate.envers.strategy.AuditStrategy;
@@ -54,7 +55,7 @@ public final class ThreeEntityQueryGenerator extends AbstractRelationQueryGenera
 									 MiddleIdData referencingIdData, MiddleIdData referencedIdData,
 									 MiddleIdData indexIdData, boolean revisionTypeInId,
 									 MiddleComponentData... componentData) {
-		super( verEntCfg, referencingIdData, revisionTypeInId );
+		super(auditStrategy, verEntCfg, referencingIdData, revisionTypeInId );
 
 		/*
 		 * The valid query that we need to create:
@@ -219,6 +220,10 @@ public final class ThreeEntityQueryGenerator extends AbstractRelationQueryGenera
 			removed.addWhereWithNamedParam(REFERENCED_ENTITY_ALIAS + "." + revisionTypePropName, false, "=", DEL_REVISION_TYPE_PARAMETER);
 			// f.revision_type = DEL
 			removed.addWhereWithNamedParam(INDEX_ENTITY_ALIAS + "." + revisionTypePropName, false, "=", DEL_REVISION_TYPE_PARAMETER);
+		}
+		if (auditStrategy instanceof SpecialRevisionRestrictionProvider){
+			((SpecialRevisionRestrictionProvider)auditStrategy).setRevisionRestrictionParameter(REFERENCED_ENTITY_ALIAS,valid);
+			((SpecialRevisionRestrictionProvider)auditStrategy).setRevisionRestrictionParameter(INDEX_ENTITY_ALIAS,valid);
 		}
 	}
 

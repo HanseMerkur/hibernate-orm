@@ -31,7 +31,9 @@ import org.hibernate.envers.RevisionType;
 import org.hibernate.envers.configuration.AuditEntitiesConfiguration;
 import org.hibernate.envers.entities.mapper.id.QueryParameterData;
 import org.hibernate.envers.entities.mapper.relation.MiddleIdData;
+import org.hibernate.envers.query.impl.SpecialRevisionRestrictionProvider;
 import org.hibernate.envers.reader.AuditReaderImplementor;
+import org.hibernate.envers.strategy.AuditStrategy;
 import org.hibernate.envers.tools.query.QueryBuilder;
 
 import static org.hibernate.envers.entities.mapper.relation.query.QueryConstants.DEL_REVISION_TYPE_PARAMETER;
@@ -44,14 +46,16 @@ import static org.hibernate.envers.entities.mapper.relation.query.QueryConstants
  */
 public abstract class AbstractRelationQueryGenerator implements RelationQueryGenerator {
 	protected final AuditEntitiesConfiguration verEntCfg;
+	protected final AuditStrategy auditStrategy;
 	protected final MiddleIdData referencingIdData;
 	protected final boolean revisionTypeInId;
 
-	protected AbstractRelationQueryGenerator(AuditEntitiesConfiguration verEntCfg, MiddleIdData referencingIdData,
+	protected AbstractRelationQueryGenerator(AuditStrategy auditStrategy,AuditEntitiesConfiguration verEntCfg, MiddleIdData referencingIdData,
 											 boolean revisionTypeInId) {
 		this.verEntCfg = verEntCfg;
 		this.referencingIdData = referencingIdData;
 		this.revisionTypeInId = revisionTypeInId;
+		this.auditStrategy = auditStrategy;
 	}
 
 	/**
@@ -74,6 +78,9 @@ public abstract class AbstractRelationQueryGenerator implements RelationQueryGen
         }
 		for ( QueryParameterData paramData : referencingIdData.getPrefixedMapper().mapToQueryParametersFromId( primaryKey ) ) {
 			paramData.setParameterValue( query );
+		}
+		if (auditStrategy instanceof SpecialRevisionRestrictionProvider){
+			((SpecialRevisionRestrictionProvider)auditStrategy).setRevisionRestrictionParameter(query);
 		}
 		return query;
 	}

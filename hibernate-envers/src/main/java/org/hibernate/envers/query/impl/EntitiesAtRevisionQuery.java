@@ -106,10 +106,13 @@ public class EntitiesAtRevisionQuery extends AbstractAuditQuery {
         }
         
         Query query = buildQuery();
-        // add named parameter (only used for ValidAuditTimeStrategy) 
+        // add named parameter (only used for ValidAuditTimeStrategy)
         List<String> params = Arrays.asList(query.getNamedParameters());
         if (params.contains(REVISION_PARAMETER)) {
             query.setParameter(REVISION_PARAMETER, revision);
+        }
+        if (verCfg.getAuditStrategy() instanceof SpecialRevisionRestrictionProvider){
+            ((SpecialRevisionRestrictionProvider)verCfg.getAuditStrategy()).setRevisionRestrictionParameter(query);
         }
         List queryResult = query.list();
 
