@@ -14,8 +14,10 @@ import org.hibernate.envers.RevisionType;
 import org.hibernate.envers.configuration.internal.AuditEntitiesConfiguration;
 import org.hibernate.envers.internal.entities.mapper.id.QueryParameterData;
 import org.hibernate.envers.internal.entities.mapper.relation.MiddleIdData;
+import org.hibernate.envers.query.internal.impl.SpecialRevisionRestrictionProvider;
 import org.hibernate.envers.internal.reader.AuditReaderImplementor;
 import org.hibernate.envers.internal.tools.query.QueryBuilder;
+import org.hibernate.envers.strategy.AuditStrategy;
 
 import static org.hibernate.envers.internal.entities.mapper.relation.query.QueryConstants.DEL_REVISION_TYPE_PARAMETER;
 import static org.hibernate.envers.internal.entities.mapper.relation.query.QueryConstants.REVISION_PARAMETER;
@@ -27,15 +29,17 @@ import static org.hibernate.envers.internal.entities.mapper.relation.query.Query
  */
 public abstract class AbstractRelationQueryGenerator implements RelationQueryGenerator {
 	protected final AuditEntitiesConfiguration verEntCfg;
+	protected final AuditStrategy auditStrategy;
 	protected final MiddleIdData referencingIdData;
 	protected final boolean revisionTypeInId;
 
-	protected AbstractRelationQueryGenerator(
+	protected AbstractRelationQueryGenerator(AuditStrategy auditStrategy,
 			AuditEntitiesConfiguration verEntCfg, MiddleIdData referencingIdData,
 			boolean revisionTypeInId) {
 		this.verEntCfg = verEntCfg;
 		this.referencingIdData = referencingIdData;
 		this.revisionTypeInId = revisionTypeInId;
+		this.auditStrategy = auditStrategy;
 	}
 
 	/**
@@ -59,6 +63,9 @@ public abstract class AbstractRelationQueryGenerator implements RelationQueryGen
 		}
 		for ( QueryParameterData paramData : referencingIdData.getPrefixedMapper().mapToQueryParametersFromId( primaryKey ) ) {
 			paramData.setParameterValue( query );
+		}
+		if (auditStrategy instanceof SpecialRevisionRestrictionProvider){
+			((SpecialRevisionRestrictionProvider)auditStrategy).setRevisionRestrictionParameter(query);
 		}
 		return query;
 	}
