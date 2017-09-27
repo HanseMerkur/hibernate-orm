@@ -98,12 +98,12 @@ public class  AuditEntitiesConfiguration {
 				EnversSettings.EMBEDDABLE_SET_ORDINAL_FIELD_NAME, properties, "SETORDINAL"
 		);
 	String revisionTypeInAuditTableStr = ConfigurationHelper.getString(                
-		"org.hibernate.envers.revision_type_in_audit_table",properties,
+		EnversSettings.REVISION_TYPE_IN_AUDIT_TABLE,properties,
 		"true");
 	revisionTypeInAuditTable = Boolean.parseBoolean(revisionTypeInAuditTableStr);
 
 	String useGlobalRevisionIdStr = ConfigurationHelper.getString(                
-		"org.hibernate.envers.use_global_revision_id",properties,
+		EnversSettings.USE_GLOBAL_REVISION_ID,properties,
 		"true");
 	useGlobalRevisionId = Boolean.parseBoolean(useGlobalRevisionIdStr);
 	}
