@@ -7,12 +7,12 @@
 apply plugin: 'hibernate-matrix-testing'
 
 dependencies {
-    compile( project( ':hibernate-core' ) )
-    compile( project( ':hibernate-entitymanager' ) )
+    compile( [group: 'org.hibernate', name: 'hibernate-core', version: '5.0.14.Final']  )
+    compile( [group: 'org.hibernate', name: 'hibernate-entitymanager', version: '5.0.14.Final'] )
 
     provided( [group: 'org.hibernate', name: 'hibernate-tools', version: '3.2.0.ga'] )
     provided( libraries.ant )
-    provided( project( ':hibernate-jpamodelgen' ) )
+    provided( [group: 'org.hibernate', name: 'hibernate-jpamodelgen', version: '5.0.14.Final'] )
 
     testCompile( project(':hibernate-testing') )
     testCompile( project(path: ':hibernate-entitymanager', configuration: 'tests') )
