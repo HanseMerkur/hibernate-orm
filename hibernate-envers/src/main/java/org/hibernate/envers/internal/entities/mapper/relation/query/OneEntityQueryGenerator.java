@@ -9,6 +9,7 @@ package org.hibernate.envers.internal.entities.mapper.relation.query;
 import org.hibernate.envers.configuration.internal.AuditEntitiesConfiguration;
 import org.hibernate.envers.internal.entities.mapper.relation.MiddleComponentData;
 import org.hibernate.envers.internal.entities.mapper.relation.MiddleIdData;
+import org.hibernate.envers.query.internal.impl.SpecialRevisionRestrictionProvider;
 import org.hibernate.envers.internal.tools.query.Parameters;
 import org.hibernate.envers.internal.tools.query.QueryBuilder;
 import org.hibernate.envers.strategy.AuditStrategy;
@@ -31,7 +32,7 @@ public final class OneEntityQueryGenerator extends AbstractRelationQueryGenerato
 			AuditEntitiesConfiguration verEntCfg, AuditStrategy auditStrategy,
 			String versionsMiddleEntityName, MiddleIdData referencingIdData,
 			boolean revisionTypeInId, MiddleComponentData... componentData) {
-		super( verEntCfg, referencingIdData, revisionTypeInId );
+		super( auditStrategy,verEntCfg, referencingIdData, revisionTypeInId );
 
 		/*
 		 * The valid query that we need to create:
@@ -99,9 +100,10 @@ public final class OneEntityQueryGenerator extends AbstractRelationQueryGenerato
 				originalIdPropertyName, MIDDLE_ENTITY_ALIAS, inclusive, componentData
 		);
 		// ee.revision_type != DEL
-		rootParameters.addWhereWithNamedParam( getRevisionTypePath(), "!=", DEL_REVISION_TYPE_PARAMETER );
+		if (verEntCfg.isRevisionTypeInAuditTable()) {
+			rootParameters.addWhereWithNamedParam(getRevisionTypePath(), "!=", DEL_REVISION_TYPE_PARAMETER);
+		}
 	}
-
 	/**
 	 * Create query restrictions used to retrieve actual data and deletions that took place at exactly given revision.
 	 */
@@ -116,9 +118,17 @@ public final class OneEntityQueryGenerator extends AbstractRelationQueryGenerato
 		// Excluding current revision, because we need to match data valid at the previous one.
 		createValidDataRestrictions( auditStrategy, versionsMiddleEntityName, remQb, valid, false, componentData );
 		// ee.revision = :revision
-		removed.addWhereWithNamedParam( verEntCfg.getRevisionNumberPath(), "=", REVISION_PARAMETER );
+		if (verEntCfg.isUseGlobalRevisionId()) {
+			removed.addWhereWithNamedParam(verEntCfg.getRevisionNumberPath(), "=", REVISION_PARAMETER);
+			removed.addWhereWithNamedParam(verEntCfg.getRevisionNumberPath(), "=", verEntCfg.getRevisionFieldName());
+		}
 		// ee.revision_type = DEL
-		removed.addWhereWithNamedParam( getRevisionTypePath(), "=", DEL_REVISION_TYPE_PARAMETER );
+		if (verEntCfg.isRevisionTypeInAuditTable()) {
+			removed.addWhereWithNamedParam(getRevisionTypePath(), "=", DEL_REVISION_TYPE_PARAMETER);
+		}
+		if (auditStrategy instanceof SpecialRevisionRestrictionProvider){
+			((SpecialRevisionRestrictionProvider)auditStrategy).setRevisionRestrictionParameter(null,valid);
+		}
 	}
 
 	@Override

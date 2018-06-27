@@ -10,6 +10,7 @@ import org.hibernate.envers.configuration.internal.AuditEntitiesConfiguration;
 import org.hibernate.envers.configuration.internal.GlobalConfiguration;
 import org.hibernate.envers.internal.entities.mapper.relation.MiddleComponentData;
 import org.hibernate.envers.internal.entities.mapper.relation.MiddleIdData;
+import org.hibernate.envers.query.internal.impl.SpecialRevisionRestrictionProvider;
 import org.hibernate.envers.internal.tools.query.Parameters;
 import org.hibernate.envers.internal.tools.query.QueryBuilder;
 import org.hibernate.envers.strategy.AuditStrategy;
@@ -35,7 +36,7 @@ public final class TwoEntityQueryGenerator extends AbstractRelationQueryGenerato
 			AuditStrategy auditStrategy, String versionsMiddleEntityName,
 			MiddleIdData referencingIdData, MiddleIdData referencedIdData,
 			boolean revisionTypeInId, MiddleComponentData... componentData) {
-		super( verEntCfg, referencingIdData, revisionTypeInId );
+		super( auditStrategy,verEntCfg, referencingIdData, revisionTypeInId );
 
 		/*
 		 * The valid query that we need to create:
@@ -145,15 +146,17 @@ public final class TwoEntityQueryGenerator extends AbstractRelationQueryGenerato
 				eeOriginalIdPropertyPath, revisionPropertyPath, originalIdPropertyName, MIDDLE_ENTITY_ALIAS,
 				inclusive, componentData
 		);
-		// ee.revision_type != DEL
-		rootParameters.addWhereWithNamedParam( revisionTypePropName, "!=", DEL_REVISION_TYPE_PARAMETER );
-		// e.revision_type != DEL
-		rootParameters.addWhereWithNamedParam(
-				REFERENCED_ENTITY_ALIAS + "." + revisionTypePropName,
-				false,
-				"!=",
-				DEL_REVISION_TYPE_PARAMETER
-		);
+		if (verEntCfg.isRevisionTypeInAuditTable()) {
+			// ee.revision_type != DEL
+			rootParameters.addWhereWithNamedParam(revisionTypePropName, "!=", DEL_REVISION_TYPE_PARAMETER);
+			// e.revision_type != DEL
+			rootParameters.addWhereWithNamedParam(
+					REFERENCED_ENTITY_ALIAS + "." + revisionTypePropName,
+					false,
+					"!=",
+					DEL_REVISION_TYPE_PARAMETER
+			);
+		}
 	}
 
 	/**
@@ -171,34 +174,23 @@ public final class TwoEntityQueryGenerator extends AbstractRelationQueryGenerato
 		final String revisionPropertyPath = verEntCfg.getRevisionNumberPath();
 		final String revisionTypePropName = getRevisionTypePath();
 		// Excluding current revision, because we need to match data valid at the previous one.
-		createValidDataRestrictions(
-				globalCfg,
-				auditStrategy,
-				referencedIdData,
-				versionsMiddleEntityName,
-				remQb,
-				valid,
-				false,
-				componentData
-		);
-		// ee.revision = :revision
-		removed.addWhereWithNamedParam( revisionPropertyPath, "=", REVISION_PARAMETER );
-		// e.revision = :revision
-		removed.addWhereWithNamedParam(
-				REFERENCED_ENTITY_ALIAS + "." + revisionPropertyPath,
-				false,
-				"=",
-				REVISION_PARAMETER
-		);
-		// ee.revision_type = DEL
-		removed.addWhereWithNamedParam( revisionTypePropName, "=", DEL_REVISION_TYPE_PARAMETER );
-		// e.revision_type = DEL
-		removed.addWhereWithNamedParam(
-				REFERENCED_ENTITY_ALIAS + "." + revisionTypePropName,
-				false,
-				"=",
-				DEL_REVISION_TYPE_PARAMETER
-		);
+		createValidDataRestrictions( globalCfg, auditStrategy, referencedIdData, versionsMiddleEntityName, remQb, valid, false, componentData );
+		if (verEntCfg.isUseGlobalRevisionId()) {
+			// ee.revision = :revision
+			removed.addWhereWithNamedParam(revisionPropertyPath, "=", REVISION_PARAMETER);
+			// e.revision = :revision
+			removed.addWhereWithNamedParam(REFERENCED_ENTITY_ALIAS + "." + revisionPropertyPath, false, "=", REVISION_PARAMETER);
+		}
+		if (verEntCfg.isRevisionTypeInAuditTable()) {
+			// ee.revision_type = DEL
+			removed.addWhereWithNamedParam(revisionTypePropName, "=", DEL_REVISION_TYPE_PARAMETER);
+			// e.revision_type = DEL
+			removed.addWhereWithNamedParam(REFERENCED_ENTITY_ALIAS + "." + revisionTypePropName, false, "=", DEL_REVISION_TYPE_PARAMETER);
+		}
+		if (auditStrategy instanceof SpecialRevisionRestrictionProvider){
+			((SpecialRevisionRestrictionProvider)auditStrategy).setRevisionRestrictionParameter(null,valid);
+			((SpecialRevisionRestrictionProvider)auditStrategy).setRevisionRestrictionParameter(REFERENCED_ENTITY_ALIAS,valid);
+		}
 	}
 
 	@Override
