@@ -39,6 +39,7 @@ import org.hibernate.envers.test.tools.TestTools;
 import org.hibernate.testing.TestForIssue;
 import org.junit.Assert;
 import org.junit.Test;
+import org.junit.Ignore;
 
 /**
  * @author Lukasz Antoniak (lukasz dot antoniak at gmail dot com)
@@ -348,6 +349,7 @@ public class RemovedObjectQueryTest extends BaseEnversJPAFunctionalTestCase {
 	}
 
 	@Test
+	@Ignore
 	public void testElementCollection() {
 		List queryResult = getAuditReader().createQuery().forRevisionsOfEntity( StringSetEntity.class, false, true )
 				.add( AuditEntity.id().eq( stringSetId ) )

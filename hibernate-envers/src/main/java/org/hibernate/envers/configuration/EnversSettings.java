@@ -121,6 +121,16 @@ public interface EnversSettings {
 	String ALLOW_IDENTIFIER_REUSE = "org.hibernate.envers.allow_identifier_reuse";
 
 	/**
+	 * Indicates if the audit table includes a column holding the revision type
+	 */
+	public  static final String REVISION_TYPE_IN_AUDIT_TABLE="org.hibernate.envers.revision_type_in_audit_table";
+
+	/**
+	 * Indicates if envers is using a global revision id or separate ids for each table
+	 */
+	public static final String USE_GLOBAL_REVISION_ID="org.hibernate.envers.use_global_revision_id";
+
+	/**
 	 * Forces {@code AuditReader#find} implementations that accept a revision-number argument to perform an exact
 	 * match against the supplied revision number rather than potentially returning hits that are less-than or
 	 * equal-to the supplied revision number.
