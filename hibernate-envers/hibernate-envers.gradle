@@ -8,15 +8,21 @@ apply plugin: 'hibernate-matrix-testing'
 apply plugin: 'maven'
 
 dependencies {
-    compile( project( ':hibernate-core' ) )
-    compile( project( ':hibernate-entitymanager' ) )
+    //compile( project( ':hibernate-core' ) )
+    //compile( project( ':hibernate-entitymanager' ) )
+    compile( [group: 'org.hibernate', name: 'hibernate-core', version: '5.1.10.Final'] )
+    compile( [group: 'org.hibernate', name: 'hibernate-entitymanager', version: '5.1.10.Final'] )
 
     provided( [group: 'org.hibernate', name: 'hibernate-tools', version: '3.2.0.ga'] )
     provided( libraries.ant )
-    provided( project( ':hibernate-jpamodelgen' ) )
+    provided( [group: 'org.hibernate', name: 'hibernate-jpamodelgen', version: '5.1.10.Final'] )
+    //provided( project( ':hibernate-jpamodelgen' ) )
 
     testCompile( project(':hibernate-testing') )
-    testCompile( project(path: ':hibernate-entitymanager', configuration: 'tests') )
+    //testCompile( [group: 'org.hibernate', name: 'hibernate-testing', version: '5.1.10.Final',configuration: 'test'] )
+    testCompile(files('../hibernate-entitymanager/target/libs/hibernate-entitymanager-5.1.10.HM1-SNAPSHOT-test.jar'))
+    //testCompile( project(path: ':hibernate-entitymanager', configuration: 'tests') )
+    testCompile( [group: 'org.hibernate', name: 'hibernate-entitymanager', version: '5.1.10.Final',configuration: 'test'] )
 
     testRuntime( libraries.javassist )
 }
