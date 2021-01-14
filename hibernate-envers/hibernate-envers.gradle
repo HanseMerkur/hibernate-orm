@@ -7,6 +7,7 @@
 
 apply from: rootProject.file( 'gradle/published-java-module.gradle' )
 apply plugin: 'hibernate-matrix-testing'
+apply plugin: 'maven'
 
 description = 'Hibernate\'s entity version (audit/history) support'
 

@@ -13,6 +13,7 @@ import org.hibernate.envers.internal.entities.mapper.id.IdMapper;
 import org.hibernate.envers.internal.entities.mapper.relation.MiddleIdData;
 import org.hibernate.envers.internal.tools.query.Parameters;
 import org.hibernate.envers.internal.tools.query.QueryBuilder;
+import org.hibernate.envers.query.internal.impl.SpecialRevisionRestrictionProvider;
 import org.hibernate.envers.strategy.AuditStrategy;
 
 import static org.hibernate.envers.internal.entities.mapper.relation.query.QueryConstants.DEL_REVISION_TYPE_PARAMETER;
@@ -43,7 +44,7 @@ public final class OneAuditEntityQueryGenerator extends AbstractRelationQueryGen
 			boolean revisionTypeInId,
 			String mappedBy,
 			boolean mappedByKey) {
-		super( verEntCfg, referencingIdData, revisionTypeInId );
+		super( auditStrategy, verEntCfg, referencingIdData, revisionTypeInId );
 
 		this.mappedBy = mappedBy;
 
@@ -124,7 +125,9 @@ public final class OneAuditEntityQueryGenerator extends AbstractRelationQueryGen
 				true
 		);
 		// e.revision_type != DEL
-		rootParameters.addWhereWithNamedParam( getRevisionTypePath(), false, "!=", DEL_REVISION_TYPE_PARAMETER );
+		if ( verEntCfg.isRevisionTypeInAuditTable() ) {
+			rootParameters.addWhereWithNamedParam( getRevisionTypePath(), false, "!=", DEL_REVISION_TYPE_PARAMETER );
+		}
 	}
 
 	/**
@@ -140,10 +143,17 @@ public final class OneAuditEntityQueryGenerator extends AbstractRelationQueryGen
 		final Parameters removed = disjoint.addSubParameters( "and" );
 		// Excluding current revision, because we need to match data valid at the previous one.
 		createValidDataRestrictions( globalCfg, auditStrategy, referencedIdData, remQb, valid );
-		// e.revision = :revision
-		removed.addWhereWithNamedParam( verEntCfg.getRevisionNumberPath(), false, "=", REVISION_PARAMETER );
-		// e.revision_type = DEL
-		removed.addWhereWithNamedParam( getRevisionTypePath(), false, "=", DEL_REVISION_TYPE_PARAMETER );
+		if ( verEntCfg.isUseGlobalRevisionId() ) {
+			// e.revision = :revision
+			removed.addWhereWithNamedParam( verEntCfg.getRevisionNumberPath(), false, "=", REVISION_PARAMETER );
+		}
+		if ( verEntCfg.isRevisionTypeInAuditTable() ) {
+			// e.revision_type = DEL
+			removed.addWhereWithNamedParam( getRevisionTypePath(), false, "=", DEL_REVISION_TYPE_PARAMETER );
+		}
+		if ( auditStrategy instanceof SpecialRevisionRestrictionProvider ) {
+			( (SpecialRevisionRestrictionProvider) auditStrategy ).setRevisionRestrictionParameter( null, valid );
+		}
 	}
 
 	@Override

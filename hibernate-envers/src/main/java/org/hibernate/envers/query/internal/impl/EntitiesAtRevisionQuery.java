@@ -52,22 +52,22 @@ public class EntitiesAtRevisionQuery extends AbstractAuditQuery {
 
 	public List list() {
 		/*
-         * The query that we need to create:
-         *   SELECT new list(e) FROM versionsReferencedEntity e
-         *   WHERE
-         * (all specified conditions, transformed, on the "e" entity) AND
-         * (selecting e entities at revision :revision)
-         *   --> for DefaultAuditStrategy:
-         *     e.revision = (SELECT max(e2.revision) FROM versionsReferencedEntity e2
-         *       WHERE e2.revision <= :revision AND e2.id = e.id) 
-         *     
-         *   --> for ValidityAuditStrategy:
-         *     e.revision <= :revision and (e.endRevision > :revision or e.endRevision is null)
-         *     
-         *     AND
-         * (only non-deleted entities)
-         *     e.revision_type != DEL
-         */
+		 * The query that we need to create:
+		 *   SELECT new list(e) FROM versionsReferencedEntity e
+		 *   WHERE
+		 * (all specified conditions, transformed, on the "e" entity) AND
+		 * (selecting e entities at revision :revision)
+		 *   --> for DefaultAuditStrategy:
+		 *     e.revision = (SELECT max(e2.revision) FROM versionsReferencedEntity e2
+		 *       WHERE e2.revision <= :revision AND e2.id = e.id)
+		 *
+		 *   --> for ValidityAuditStrategy:
+		 *     e.revision <= :revision and (e.endRevision > :revision or e.endRevision is null)
+		 *
+		 *     AND
+		 * (only non-deleted entities)
+		 *     e.revision_type != DEL
+		 */
 		AuditEntitiesConfiguration verEntCfg = enversService.getAuditEntitiesConfiguration();
 		String revisionPropertyPath = verEntCfg.getRevisionNumberPath();
 		String originalIdPropertyName = verEntCfg.getOriginalIdPropName();
@@ -97,7 +97,7 @@ public class EntitiesAtRevisionQuery extends AbstractAuditQuery {
 				true
 		);
 
-		if ( !includeDeletions ) {
+		if ( !includeDeletions && verEntCfg.isRevisionTypeInAuditTable() ) {
 			// e.revision_type != DEL
 			qb.getRootParameters().addWhereWithParam( verEntCfg.getRevisionTypePropName(), "<>", RevisionType.DEL );
 		}
@@ -114,7 +114,7 @@ public class EntitiesAtRevisionQuery extends AbstractAuditQuery {
 			);
 		}
 
-		for (final AuditAssociationQueryImpl<?> associationQuery : associationQueries) {
+		for ( final AuditAssociationQueryImpl<?> associationQuery : associationQueries ) {
 			associationQuery.addCriterionsToQuery( versionsReader );
 		}
 
@@ -124,6 +124,12 @@ public class EntitiesAtRevisionQuery extends AbstractAuditQuery {
 		if ( params.contains( REVISION_PARAMETER ) ) {
 			query.setParameter( REVISION_PARAMETER, revision );
 		}
+
+		if ( enversService.getAuditStrategy() instanceof SpecialRevisionRestrictionProvider ) {
+			( (SpecialRevisionRestrictionProvider) enversService.getAuditStrategy() ).setRevisionRestrictionParameter(
+					query );
+		}
+
 		List queryResult = query.list();
 		return applyProjections( queryResult, revision );
 	}
