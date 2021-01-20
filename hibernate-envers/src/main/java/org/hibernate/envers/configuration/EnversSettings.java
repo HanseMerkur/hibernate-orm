@@ -142,4 +142,15 @@ public interface EnversSettings {
 	 * @since 5.4.7
 	 */
 	String MODIFIED_COLUMN_NAMING_STRATEGY = "org.hibernate.envers.modified_column_naming_strategy";
+
+	/**
+	 * Indicates if the audit table includes a column holding the revision type
+	 */
+	String REVISION_TYPE_IN_AUDIT_TABLE="org.hibernate.envers.revision_type_in_audit_table";
+
+	/**
+	 * Indicates if envers is using a global revision id or separate ids for each table
+	 */
+	String USE_GLOBAL_REVISION_ID="org.hibernate.envers.use_global_revision_id";
+
 }

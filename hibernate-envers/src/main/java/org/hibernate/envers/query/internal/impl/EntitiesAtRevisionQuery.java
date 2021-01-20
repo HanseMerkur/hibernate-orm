@@ -102,7 +102,7 @@ public class EntitiesAtRevisionQuery extends AbstractAuditQuery {
 			qb.getRootParameters().addWhereWithNamedParam( revisionPropertyPath, "=", REVISION_PARAMETER );
 		}
 
-		if ( !includeDeletions ) {
+		if ( !includeDeletions && verEntCfg.isRevisionTypeInAuditTable() ) {
 			// e.revision_type != DEL
 			qb.getRootParameters().addWhereWithParam( verEntCfg.getRevisionTypePropName(), "<>", RevisionType.DEL );
 		}
@@ -128,6 +128,10 @@ public class EntitiesAtRevisionQuery extends AbstractAuditQuery {
 		Collection<String> params = query.getParameterMetadata().getNamedParameterNames();
 		if ( params.contains( REVISION_PARAMETER ) ) {
 			query.setParameter( REVISION_PARAMETER, revision );
+		}
+		if ( enversService.getAuditStrategy() instanceof SpecialRevisionRestrictionProvider ) {
+			( (SpecialRevisionRestrictionProvider) enversService.getAuditStrategy() ).setRevisionRestrictionParameter(
+					query );
 		}
 		List queryResult = query.list();
 		return applyProjections( queryResult, revision );

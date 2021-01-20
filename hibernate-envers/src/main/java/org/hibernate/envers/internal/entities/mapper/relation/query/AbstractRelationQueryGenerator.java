@@ -19,6 +19,7 @@ import org.hibernate.envers.internal.entities.mapper.id.QueryParameterData;
 import org.hibernate.envers.internal.entities.mapper.relation.MiddleIdData;
 import org.hibernate.envers.internal.tools.query.Parameters;
 import org.hibernate.envers.internal.tools.query.QueryBuilder;
+import org.hibernate.envers.query.internal.impl.SpecialRevisionRestrictionProvider;
 import org.hibernate.envers.strategy.AuditStrategy;
 import org.hibernate.query.Query;
 
@@ -65,12 +66,18 @@ public abstract class AbstractRelationQueryGenerator implements RelationQueryGen
 		final String queryString = getQueryString( session.getFactory(), removed );
 
 		final Query query = session.createQuery( queryString );
-		query.setParameter( DEL_REVISION_TYPE_PARAMETER, RevisionType.DEL );
-		query.setParameter( REVISION_PARAMETER, revision );
+		if ( verEntCfg.isRevisionTypeInAuditTable() ) {
+			query.setParameter( DEL_REVISION_TYPE_PARAMETER, RevisionType.DEL );
+			query.setParameter( REVISION_PARAMETER, revision );
+		}
 
 		final IdMapper prefixIdMapper = referencingIdData.getPrefixedMapper();
 		for ( QueryParameterData paramData : prefixIdMapper.mapToQueryParametersFromId( primaryKey ) ) {
 			paramData.setParameterValue( query );
+		}
+
+		if ( auditStrategy instanceof SpecialRevisionRestrictionProvider ) {
+			( (SpecialRevisionRestrictionProvider) auditStrategy ).setRevisionRestrictionParameter( query );
 		}
 
 		return query;

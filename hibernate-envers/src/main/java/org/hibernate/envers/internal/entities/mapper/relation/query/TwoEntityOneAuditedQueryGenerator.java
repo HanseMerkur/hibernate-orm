@@ -13,6 +13,7 @@ import org.hibernate.envers.internal.entities.mapper.relation.MiddleComponentDat
 import org.hibernate.envers.internal.entities.mapper.relation.MiddleIdData;
 import org.hibernate.envers.internal.tools.query.Parameters;
 import org.hibernate.envers.internal.tools.query.QueryBuilder;
+import org.hibernate.envers.query.internal.impl.SpecialRevisionRestrictionProvider;
 import org.hibernate.envers.strategy.AuditStrategy;
 import org.hibernate.internal.util.StringHelper;
 
@@ -127,8 +128,10 @@ public final class TwoEntityOneAuditedQueryGenerator extends AbstractRelationQue
 				true,
 				componentDatas
 		);
-		// ee.revision_type != DEL
-		rootParameters.addWhereWithNamedParam( getRevisionTypePath(), "!=", DEL_REVISION_TYPE_PARAMETER );
+		if (verEntCfg.isRevisionTypeInAuditTable()) {
+			// ee.revision_type != DEL
+			rootParameters.addWhereWithNamedParam( getRevisionTypePath(), "!=", DEL_REVISION_TYPE_PARAMETER );
+		}
 	}
 
 	@Override
@@ -139,9 +142,16 @@ public final class TwoEntityOneAuditedQueryGenerator extends AbstractRelationQue
 		// Restrictions to match all rows deleted at exactly given revision.
 		final Parameters removed = disjoint.addSubParameters( "and" );
 		applyValidPredicates( remQb, valid, false );
-		// ee.revision = :revision
-		removed.addWhereWithNamedParam( verEntCfg.getRevisionNumberPath(), "=", REVISION_PARAMETER );
-		// ee.revision_type = DEL
-		removed.addWhereWithNamedParam( getRevisionTypePath(), "=", DEL_REVISION_TYPE_PARAMETER );
+		if ( verEntCfg.isUseGlobalRevisionId() ) {
+			// ee.revision = :revision
+			removed.addWhereWithNamedParam( verEntCfg.getRevisionNumberPath(), "=", REVISION_PARAMETER );
+		}
+		if ( verEntCfg.isRevisionTypeInAuditTable() ) {
+			// ee.revision_type = DEL
+			removed.addWhereWithNamedParam( getRevisionTypePath(), "=", DEL_REVISION_TYPE_PARAMETER );
+		}
+		if ( auditStrategy instanceof SpecialRevisionRestrictionProvider ) {
+			( (SpecialRevisionRestrictionProvider) auditStrategy ).setRevisionRestrictionParameter( null, valid );
+		}
 	}
 }
