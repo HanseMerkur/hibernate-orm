@@ -13,6 +13,7 @@ import org.hibernate.envers.internal.entities.mapper.relation.MiddleComponentDat
 import org.hibernate.envers.internal.entities.mapper.relation.MiddleIdData;
 import org.hibernate.envers.internal.tools.query.Parameters;
 import org.hibernate.envers.internal.tools.query.QueryBuilder;
+import org.hibernate.envers.query.internal.impl.SpecialRevisionRestrictionProvider;
 import org.hibernate.envers.strategy.AuditStrategy;
 
 import static org.hibernate.envers.internal.entities.mapper.relation.query.QueryConstants.DEL_REVISION_TYPE_PARAMETER;
@@ -116,7 +117,9 @@ public final class OneEntityQueryGenerator extends AbstractRelationQueryGenerato
 				componentDatas
 		);
 		// ee.revision_type != DEL
-		rootParameters.addWhereWithNamedParam( getRevisionTypePath(), "!=", DEL_REVISION_TYPE_PARAMETER );
+		if ( verEntCfg.isRevisionTypeInAuditTable() ) {
+			rootParameters.addWhereWithNamedParam( getRevisionTypePath(), "!=", DEL_REVISION_TYPE_PARAMETER );
+		}
 	}
 
 	@Override
@@ -128,9 +131,17 @@ public final class OneEntityQueryGenerator extends AbstractRelationQueryGenerato
 		final Parameters removed = disjoint.addSubParameters( "and" );
 		// Excluding current revision, because we need to match data valid at the previous one.
 		applyValidPredicates( remQb, valid, false );
-		// ee.revision = :revision
-		removed.addWhereWithNamedParam( verEntCfg.getRevisionNumberPath(), "=", REVISION_PARAMETER );
+		if ( verEntCfg.isUseGlobalRevisionId() ) {
+			// ee.revision = :revision
+			removed.addWhereWithNamedParam( verEntCfg.getRevisionNumberPath(), "=", REVISION_PARAMETER );
+			removed.addWhereWithNamedParam( verEntCfg.getRevisionNumberPath(), "=", verEntCfg.getRevisionFieldName() );
+		}
 		// ee.revision_type = DEL
-		removed.addWhereWithNamedParam( getRevisionTypePath(), "=", DEL_REVISION_TYPE_PARAMETER );
+		if ( verEntCfg.isRevisionTypeInAuditTable() ) {
+			removed.addWhereWithNamedParam( getRevisionTypePath(), "=", DEL_REVISION_TYPE_PARAMETER );
+		}
+		if ( auditStrategy instanceof SpecialRevisionRestrictionProvider ) {
+			( (SpecialRevisionRestrictionProvider) auditStrategy ).setRevisionRestrictionParameter( null, valid );
+		}
 	}
 }

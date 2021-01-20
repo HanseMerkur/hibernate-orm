@@ -13,6 +13,7 @@ import org.hibernate.envers.internal.entities.mapper.relation.MiddleComponentDat
 import org.hibernate.envers.internal.entities.mapper.relation.MiddleIdData;
 import org.hibernate.envers.internal.tools.query.Parameters;
 import org.hibernate.envers.internal.tools.query.QueryBuilder;
+import org.hibernate.envers.query.internal.impl.SpecialRevisionRestrictionProvider;
 import org.hibernate.envers.strategy.AuditStrategy;
 import org.hibernate.internal.util.StringHelper;
 
@@ -200,22 +201,24 @@ public final class ThreeEntityQueryGenerator extends AbstractRelationQueryGenera
 				inclusive,
 				componentDatas
 		);
-		// ee.revision_type != DEL
-		rootParameters.addWhereWithNamedParam( revisionTypePropName, "!=", DEL_REVISION_TYPE_PARAMETER );
-		// e.revision_type != DEL
-		rootParameters.addWhereWithNamedParam(
-				REFERENCED_ENTITY_ALIAS + "." + revisionTypePropName,
-				false,
-				"!=",
-				DEL_REVISION_TYPE_PARAMETER
-		);
-		// f.revision_type != DEL
-		rootParameters.addWhereWithNamedParam(
-				INDEX_ENTITY_ALIAS + "." + revisionTypePropName,
-				false,
-				"!=",
-				DEL_REVISION_TYPE_PARAMETER
-		);
+		if ( verEntCfg.isRevisionTypeInAuditTable() ) {
+			// ee.revision_type != DEL
+			rootParameters.addWhereWithNamedParam( revisionTypePropName, "!=", DEL_REVISION_TYPE_PARAMETER );
+			// e.revision_type != DEL
+			rootParameters.addWhereWithNamedParam(
+					REFERENCED_ENTITY_ALIAS + "." + revisionTypePropName,
+					false,
+					"!=",
+					DEL_REVISION_TYPE_PARAMETER
+			);
+			// f.revision_type != DEL
+			rootParameters.addWhereWithNamedParam(
+					INDEX_ENTITY_ALIAS + "." + revisionTypePropName,
+					false,
+					"!=",
+					DEL_REVISION_TYPE_PARAMETER
+			);
+		}
 	}
 
 	@Override
@@ -229,37 +232,51 @@ public final class ThreeEntityQueryGenerator extends AbstractRelationQueryGenera
 		final String revisionTypePropName = getRevisionTypePath();
 		// Excluding current revision, because we need to match data valid at the previous one.
 		applyValidPredicates( remQb, valid, false );
-		// ee.revision = :revision
-		removed.addWhereWithNamedParam( revisionPropertyPath, "=", REVISION_PARAMETER );
-		// e.revision = :revision
-		removed.addWhereWithNamedParam(
-				REFERENCED_ENTITY_ALIAS + "." + revisionPropertyPath,
-				false,
-				"=",
-				REVISION_PARAMETER
-		);
-		// f.revision = :revision
-		removed.addWhereWithNamedParam(
-				INDEX_ENTITY_ALIAS + "." + revisionPropertyPath,
-				false,
-				"=",
-				REVISION_PARAMETER
-		);
-		// ee.revision_type = DEL
-		removed.addWhereWithNamedParam( revisionTypePropName, "=", DEL_REVISION_TYPE_PARAMETER );
-		// e.revision_type = DEL
-		removed.addWhereWithNamedParam(
-				REFERENCED_ENTITY_ALIAS + "." + revisionTypePropName,
-				false,
-				"=",
-				DEL_REVISION_TYPE_PARAMETER
-		);
-		// f.revision_type = DEL
-		removed.addWhereWithNamedParam(
-				INDEX_ENTITY_ALIAS + "." + revisionTypePropName,
-				false,
-				"=",
-				DEL_REVISION_TYPE_PARAMETER
-		);
+		if ( verEntCfg.isUseGlobalRevisionId() ) {
+			// ee.revision = :revision
+			removed.addWhereWithNamedParam( revisionPropertyPath, "=", REVISION_PARAMETER );
+			// e.revision = :revision
+			removed.addWhereWithNamedParam(
+					REFERENCED_ENTITY_ALIAS + "." + revisionPropertyPath,
+					false,
+					"=",
+					REVISION_PARAMETER
+			);
+			// f.revision = :revision
+			removed.addWhereWithNamedParam(
+					INDEX_ENTITY_ALIAS + "." + revisionPropertyPath,
+					false,
+					"=",
+					REVISION_PARAMETER
+			);
+		}
+		if ( verEntCfg.isRevisionTypeInAuditTable() ) {
+			// ee.revision_type = DEL
+			removed.addWhereWithNamedParam( revisionTypePropName, "=", DEL_REVISION_TYPE_PARAMETER );
+			// e.revision_type = DEL
+			removed.addWhereWithNamedParam(
+					REFERENCED_ENTITY_ALIAS + "." + revisionTypePropName,
+					false,
+					"=",
+					DEL_REVISION_TYPE_PARAMETER
+			);
+			// f.revision_type = DEL
+			removed.addWhereWithNamedParam(
+					INDEX_ENTITY_ALIAS + "." + revisionTypePropName,
+					false,
+					"=",
+					DEL_REVISION_TYPE_PARAMETER
+			);
+		}
+		if ( auditStrategy instanceof SpecialRevisionRestrictionProvider ) {
+			( (SpecialRevisionRestrictionProvider) auditStrategy ).setRevisionRestrictionParameter(
+					REFERENCED_ENTITY_ALIAS,
+					valid
+			);
+			( (SpecialRevisionRestrictionProvider) auditStrategy ).setRevisionRestrictionParameter(
+					INDEX_ENTITY_ALIAS,
+					valid
+			);
+		}
 	}
 }
