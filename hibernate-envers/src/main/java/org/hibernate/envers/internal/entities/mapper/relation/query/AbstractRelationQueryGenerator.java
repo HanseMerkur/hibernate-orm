@@ -44,15 +44,17 @@ import static org.hibernate.envers.internal.entities.mapper.relation.query.Query
  */
 public abstract class AbstractRelationQueryGenerator implements RelationQueryGenerator {
 	protected final AuditEntitiesConfiguration verEntCfg;
+	protected final AuditStrategy auditStrategy;
 	protected final MiddleIdData referencingIdData;
 	protected final boolean revisionTypeInId;
 
-	protected AbstractRelationQueryGenerator(
+	protected AbstractRelationQueryGenerator(AuditStrategy auditStrategy,
 			AuditEntitiesConfiguration verEntCfg, MiddleIdData referencingIdData,
 			boolean revisionTypeInId) {
 		this.verEntCfg = verEntCfg;
 		this.referencingIdData = referencingIdData;
 		this.revisionTypeInId = revisionTypeInId;
+		this.auditStrategy = auditStrategy;
 	}
 
 	/**
@@ -70,13 +72,21 @@ public abstract class AbstractRelationQueryGenerator implements RelationQueryGen
 	@Override
 	public Query getQuery(AuditReaderImplementor versionsReader, Object primaryKey, Number revision, boolean removed) {
 		final Query query = versionsReader.getSession().createQuery( removed ? getQueryRemovedString() : getQueryString() );
-		query.setParameter( DEL_REVISION_TYPE_PARAMETER, RevisionType.DEL );
-		query.setParameter( REVISION_PARAMETER, revision );
+
+		if (verEntCfg.isRevisionTypeInAuditTable()) {
+			query.setParameter(DEL_REVISION_TYPE_PARAMETER, RevisionType.DEL);
+			query.setParameter(REVISION_PARAMETER, revision);
+		}
 		for ( QueryParameterData paramData : referencingIdData.getPrefixedMapper().mapToQueryParametersFromId(
 				primaryKey
 		) ) {
 			paramData.setParameterValue( query );
 		}
+
+		if (auditStrategy instanceof SpecialRevisionRestrictionProvider){
+			((SpecialRevisionRestrictionProvider)auditStrategy).setRevisionRestrictionParameter(query);
+		}
+
 		return query;
 	}
 

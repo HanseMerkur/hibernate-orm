@@ -31,6 +31,7 @@ import org.hibernate.envers.test.integration.manytomany.ternary.TernaryMapEntity
 import org.hibernate.envers.test.tools.TestTools;
 
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import org.hibernate.testing.TestForIssue;
@@ -342,6 +343,7 @@ public class RemovedObjectQueryTest extends BaseEnversJPAFunctionalTestCase {
 		);
 	}
 
+	@Ignore
 	@Test
 	public void testElementCollection() {
 		List queryResult = getAuditReader().createQuery().forRevisionsOfEntity( StringSetEntity.class, false, true )

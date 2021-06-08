@@ -126,6 +126,9 @@ public class EntitiesAtRevisionQuery extends AbstractAuditQuery {
 		if ( params.contains( REVISION_PARAMETER ) ) {
 			query.setParameter( REVISION_PARAMETER, revision );
 		}
+		if (verCfg.getAuditStrategy() instanceof SpecialRevisionRestrictionProvider){
+			((SpecialRevisionRestrictionProvider)verCfg.getAuditStrategy()).setRevisionRestrictionParameter(query);
+		}
 		List queryResult = query.list();
 
 		if ( hasProjection ) {

@@ -29,6 +29,7 @@ import org.hibernate.envers.internal.entities.mapper.relation.MiddleIdData;
 import org.hibernate.envers.internal.tools.query.Parameters;
 import org.hibernate.envers.internal.tools.query.QueryBuilder;
 import org.hibernate.envers.strategy.AuditStrategy;
+import org.hibernate.envers.query.impl.SpecialRevisionRestrictionProvider;
 
 import static org.hibernate.envers.internal.entities.mapper.relation.query.QueryConstants.DEL_REVISION_TYPE_PARAMETER;
 import static org.hibernate.envers.internal.entities.mapper.relation.query.QueryConstants.MIDDLE_ENTITY_ALIAS;
@@ -48,7 +49,7 @@ public final class OneEntityQueryGenerator extends AbstractRelationQueryGenerato
 			AuditEntitiesConfiguration verEntCfg, AuditStrategy auditStrategy,
 			String versionsMiddleEntityName, MiddleIdData referencingIdData,
 			boolean revisionTypeInId, MiddleComponentData... componentData) {
-		super( verEntCfg, referencingIdData, revisionTypeInId );
+		super(auditStrategy, verEntCfg, referencingIdData, revisionTypeInId );
 
 		/*
 		 * The valid query that we need to create:
@@ -115,8 +116,11 @@ public final class OneEntityQueryGenerator extends AbstractRelationQueryGenerato
 				referencingIdData, versionsMiddleEntityName, eeOriginalIdPropertyPath, revisionPropertyPath,
 				originalIdPropertyName, MIDDLE_ENTITY_ALIAS, inclusive, componentData
 		);
-		// ee.revision_type != DEL
-		rootParameters.addWhereWithNamedParam( getRevisionTypePath(), "!=", DEL_REVISION_TYPE_PARAMETER );
+
+		if (verEntCfg.isRevisionTypeInAuditTable()) {
+			// ee.revision_type != DEL
+			rootParameters.addWhereWithNamedParam(getRevisionTypePath(), "!=", DEL_REVISION_TYPE_PARAMETER);
+		}
 	}
 
 	/**
@@ -132,10 +136,22 @@ public final class OneEntityQueryGenerator extends AbstractRelationQueryGenerato
 		final Parameters removed = disjoint.addSubParameters( "and" );
 		// Excluding current revision, because we need to match data valid at the previous one.
 		createValidDataRestrictions( auditStrategy, versionsMiddleEntityName, remQb, valid, false, componentData );
-		// ee.revision = :revision
-		removed.addWhereWithNamedParam( verEntCfg.getRevisionNumberPath(), "=", REVISION_PARAMETER );
-		// ee.revision_type = DEL
-		removed.addWhereWithNamedParam( getRevisionTypePath(), "=", DEL_REVISION_TYPE_PARAMETER );
+
+		if (verEntCfg.isUseGlobalRevisionId()) {
+			// ee.revision = :revision
+			removed.addWhereWithNamedParam(verEntCfg.getRevisionNumberPath(), "=", REVISION_PARAMETER);
+			removed.addWhereWithNamedParam(verEntCfg.getRevisionNumberPath(), "=", verEntCfg.getRevisionFieldName());
+		}
+
+		if (verEntCfg.isRevisionTypeInAuditTable()) {
+			// ee.revision_type = DEL
+			removed.addWhereWithNamedParam(getRevisionTypePath(), "=", DEL_REVISION_TYPE_PARAMETER);
+		}
+
+		if (auditStrategy instanceof SpecialRevisionRestrictionProvider){
+			((SpecialRevisionRestrictionProvider)auditStrategy).setRevisionRestrictionParameter(null,valid);
+		}
+
 	}
 
 	@Override

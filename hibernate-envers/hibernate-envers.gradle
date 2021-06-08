@@ -7,8 +7,8 @@ configurations {
 }
 
 dependencies {
-    compile( project( ':hibernate-core' ) )
-    compile( project( ':hibernate-entitymanager' ) )
+    compile( [group: 'org.hibernate', name: 'hibernate-core', version: '4.3.10.Final'])
+    compile( [group: 'org.hibernate', name: 'hibernate-entitymanager', version: '4.3.10.Final'])
 
     provided( [group: 'org.hibernate', name: 'hibernate-tools', version: '3.2.0.ga'] )
     provided( libraries.ant )
