@@ -1,7 +1,7 @@
 package org.hibernate.envers.query.impl;
 
 import org.hibernate.Query;
-import org.hibernate.envers.tools.query.Parameters;
+import org.hibernate.envers.internal.tools.query.Parameters;
 
 /**
  * If an AuditStrategy is implementing this Interface,

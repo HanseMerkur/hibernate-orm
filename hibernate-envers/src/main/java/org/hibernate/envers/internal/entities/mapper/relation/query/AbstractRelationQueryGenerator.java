@@ -33,6 +33,8 @@ import org.hibernate.envers.internal.entities.mapper.id.QueryParameterData;
 import org.hibernate.envers.internal.entities.mapper.relation.MiddleIdData;
 import org.hibernate.envers.internal.reader.AuditReaderImplementor;
 import org.hibernate.envers.internal.tools.query.QueryBuilder;
+import org.hibernate.envers.strategy.AuditStrategy;
+import org.hibernate.envers.query.impl.SpecialRevisionRestrictionProvider;
 
 import static org.hibernate.envers.internal.entities.mapper.relation.query.QueryConstants.DEL_REVISION_TYPE_PARAMETER;
 import static org.hibernate.envers.internal.entities.mapper.relation.query.QueryConstants.REVISION_PARAMETER;

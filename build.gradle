@@ -4,32 +4,36 @@ apply from: "./libraries.gradle"
 
 allprojects {
     repositories {
-        mavenCentral()
+		maven { url "https://repo.maven.apache.org/maven2" }
+  //      mavenCentral()
         mavenLocal()
+
+
 
         maven {
             name 'jboss-nexus'
-            url "http://repository.jboss.org/nexus/content/groups/public/"
+            url "https://repository.jboss.org/nexus/content/groups/public/"
         }
         maven {
             name "jboss-snapshots"
-            url "http://snapshots.jboss.org/maven2/"
+            url "https://snapshots.jboss.org/maven2/"
         }
     }
 }
 
 buildscript {
     repositories {
-        mavenCentral()
+		maven { url "https://repo.maven.apache.org/maven2" }
+    //    mavenCentral()
         mavenLocal()
 
         maven {
             name 'jboss-nexus'
-            url "http://repository.jboss.org/nexus/content/groups/public/"
+            url "https://repository.jboss.org/nexus/content/groups/public/"
         }
         maven {
             name "jboss-snapshots"
-            url "http://snapshots.jboss.org/maven2/"
+            url "https://snapshots.jboss.org/maven2/"
         }
     }
     dependencies {
@@ -418,6 +422,7 @@ subprojects { subProject ->
 		}
 
 		repositories {
+
 			maven {
 				if ( subProject.version.endsWith( 'SNAPSHOT' ) ) {
 					name 'jboss-snapshots-repository'

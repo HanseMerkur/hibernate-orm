@@ -30,6 +30,9 @@ import java.util.Properties;
 import org.hibernate.envers.configuration.EnversSettings;
 import org.hibernate.envers.strategy.DefaultAuditStrategy;
 import org.hibernate.internal.util.config.ConfigurationHelper;
+import org.hibernate.envers.internal.tools.query.Parameters;
+
+import static org.hibernate.envers.tools.Tools.getProperty;
 
 /**
  * Configuration of versions entities - names of fields, entities and tables created to store versioning information.

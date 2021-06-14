@@ -34,6 +34,7 @@ import org.hibernate.envers.configuration.spi.AuditConfiguration;
 import org.hibernate.envers.internal.entities.mapper.relation.MiddleIdData;
 import org.hibernate.envers.internal.reader.AuditReaderImplementor;
 import org.hibernate.envers.query.criteria.AuditCriterion;
+import org.hibernate.envers.query.impl.SpecialRevisionRestrictionProvider;
 
 import static org.hibernate.envers.internal.entities.mapper.relation.query.QueryConstants.REFERENCED_ENTITY_ALIAS;
 import static org.hibernate.envers.internal.entities.mapper.relation.query.QueryConstants.REFERENCED_ENTITY_ALIAS_DEF_AUD_STR;
